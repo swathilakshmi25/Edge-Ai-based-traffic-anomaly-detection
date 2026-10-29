@@ -1,0 +1,14 @@
+# Edge-AI Traffic Anomaly Detection
+# Version RANGES (not exact pins): the logic tests were run on Python 3.12 / Linux with
+# numpy 2.4, pandas 3.0, PyYAML 6.0 and OpenCV 4.13. Streamlit, Ultralytics, Plotly and PyTorch
+# could NOT be installed in the build environment, so those ranges are unverified - see README.
+# Recommended interpreter: Python 3.11 (3.10-3.12 should work).
+
+streamlit>=1.40,<2
+ultralytics>=8.3.0,<9        # YOLO11 + built-in ByteTrack; pulls in PyTorch (large download)
+opencv-python>=4.9,<5
+numpy>=1.26
+pandas>=2.1
+plotly>=5.20
+PyYAML>=6.0
+lapx>=0.5.5                  # assignment solver used by the ByteTrack tracker (Ultralytics would otherwise try to auto-install it)

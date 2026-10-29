@@ -1,0 +1,58 @@
+# Edge-AI Traffic Anomaly Detection - configuration
+# All pixel thresholds refer to the *processed* frame (after the optional resize below),
+# so results are comparable between videos of different resolution.
+
+model:
+  weights: models/yolo11n.pt        # Ultralytics YOLO weights (download with scripts/download_model.py)
+  confidence: 0.35                  # detection confidence threshold
+  imgsz: 640
+  device: cpu                       # "cpu", "0" (first GPU) or "" for automatic
+  tracker: bytetrack.yaml           # Ultralytics built-in tracker config (bytetrack.yaml or botsort.yaml)
+  vehicle_classes: [car, motorcycle, bus, truck]
+
+video:
+  frame_stride: 2                   # process every Nth frame
+  resize_width: 960                 # frames wider than this are downscaled (0 = never resize)
+  max_seconds: 0                    # stop after this many video seconds (0 = whole video)
+  default_fps: 25.0                 # used only when the file reports no valid FPS
+  max_upload_mb: 500
+  allowed_extensions: [mp4, avi, mov, mkv]
+
+wrong_way:
+  enabled: true
+  expected_direction: right         # right | left | up | down  (image coordinates; "down" = towards bottom of frame)
+  window_points: 10                 # most recent observations used per vehicle
+  min_observations: 6               # minimum observations before a vehicle can be judged
+  min_displacement_px: 40           # movement against the expected direction needed over the window
+  persistence_frames: 3             # consecutive processed frames the condition must hold
+  cooldown_s: 20                    # per-vehicle gap between repeated alerts
+
+stopped_vehicle:
+  enabled: true
+  stop_seconds: 10                  # how long a vehicle must stay (almost) still
+  move_threshold_px: 8              # movement from the anchor position that counts as "moving again"
+  min_track_age_s: 2.0
+  cooldown_s: 30
+  zone: []                          # optional road region: list of [x, y] fractions 0..1, e.g. [[0,0.4],[1,0.4],[1,1],[0,1]]
+
+proximity:
+  enabled: true
+  distance_px: 55                   # centre-to-centre distance below which two vehicles are "close"
+  min_iou: 0.10                     # ...or box overlap (IoU) at least this much
+  persistence_frames: 3
+  cooldown_s: 10                    # per vehicle pair
+
+congestion:
+  enabled: true
+  count_threshold: 12               # smoothed vehicles-in-frame level treated as congested
+  window_s: 5.0                     # smoothing window
+  sustain_s: 5.0                    # must stay above threshold this long
+  cooldown_s: 60
+
+storage:
+  db_path: data/events.db
+  outputs_dir: outputs
+  upload_dir: data/uploads
+  save_event_images: false          # event snapshots may show plates/faces - keep off unless needed
+
+source_id: Recorded video
